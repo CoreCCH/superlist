@@ -19,7 +19,7 @@ class NewVisitorTest(unittest.TestCase):
 
         # 她發現網頁標題與標頭顯示待辦事項清單
         self.assertIn('To-Do', self.browser.title)
-        header_text = self.browser.find_element(By.NAME,'h1').text
+        header_text = self.browser.find_element(By.TAG_NAME,'h1').text
         self.assertIn('To-Do', header_text)
         
         # 她馬上受邀輸入一個代辦事項
@@ -39,7 +39,8 @@ class NewVisitorTest(unittest.TestCase):
         table = self.browser.find_element(By.ID,'id_list_table')
         rows = table.find_elements(By.TAG_NAME,'tr')
         self.assertTrue(
-            any(row.text == '1:Buy peacock feathers' for row in rows)
+            any(row.text == '1:Buy peacock feathers' for row in rows),
+            "New to-do item did not appear in table"
         )
 
         # 此時仍然有一個文字方塊，讓她可以加入另一個項目
