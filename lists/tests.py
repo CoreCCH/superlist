@@ -4,6 +4,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from lists.views import home_page
 from lists.models import Item
+import re
 
 class SmokeTest(TestCase):
 
@@ -14,8 +15,13 @@ class SmokeTest(TestCase):
     def test_home_page_returns_correct_html(self):
         request = HttpRequest()
         response = home_page(request)
-        excepted_html = render_to_string('home.html')
-        self.assertEqual(response.content.decode(), excepted_html)
+        excepted_html = render_to_string('home.html', request=request)
+
+        # 忽略CSRF的value進行比對
+        response_html = self.ignore_csrf_token(response.content.decode())
+        excepted_html = self.ignore_csrf_token(excepted_html)
+
+        self.assertEqual(response_html, excepted_html)
 
     def test_home_page_can_save_a_POST_request(self):
         request = HttpRequest()
@@ -30,7 +36,17 @@ class SmokeTest(TestCase):
             'home.html',
             {'new_item_text': 'A new list item'}
         )
-        self.assertEqual(response.content.decode(), excepted_html)
+
+        # 忽略CSRF的value進行比對
+        response_html = self.ignore_csrf_token(response.content.decode())
+        excepted_html = self.ignore_csrf_token(excepted_html)
+
+        self.assertEqual(response_html, excepted_html)
+
+    @staticmethod
+    def ignore_csrf_token(html_code):
+        csrf_regex = r'<input[^>]+csrfmiddlewaretoken[^>]+>'
+        return re.sub(html_code, '', csrf_regex)
 
 class ItemModelTest(TestCase):
 
