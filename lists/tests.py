@@ -1,4 +1,4 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest
 from django.template.loader import render_to_string
@@ -30,18 +30,22 @@ class SmokeTest(TestCase):
 
         response = home_page(request)
 
-        # 檢查首頁是否有新增項目        
-        self.assertIn('A new list item', response.content.decode())
-        excepted_html = render_to_string(
-            'home.html',
-            {'new_item_text': 'A new list item'}
-        )
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
 
-        # 忽略CSRF的value進行比對
-        response_html = self.ignore_csrf_token(response.content.decode())
-        excepted_html = self.ignore_csrf_token(excepted_html)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/')
 
-        self.assertEqual(response_html, excepted_html)
+    def test_home_page_redirects_after_POST(self):
+        request = HttpRequest()
+        request.method = 'POST'
+        request.POST['item_text'] = 'A new list item'
+        
+        response = home_page(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['location'], '/')
 
     @staticmethod
     def ignore_csrf_token(html_code):
@@ -67,3 +71,20 @@ class ItemModelTest(TestCase):
 
         self.assertEqual(first_saved_item.text, 'The first (ever) list item')
         self.assertEqual(second_saved_item.text, 'Item the second')
+
+class HomePageTest(TestCase):
+
+    def test_home_page_only_saves_items_when_necessary(self):
+        request = HttpRequest()
+        home_page(request)
+        self.assertEqual(Item.objects.count(), 0)
+
+    def test_home_page_displays_all_items(self):
+        Item.objects.create(text='itemey 1')
+        Item.objects.create(text='itemey 2')
+
+        request = HttpRequest()
+        response = home_page(request)
+
+        self.assertIn('itemey 1', response.content.decode())
+        self.assertIn('itemey 2', response.content.decode())
