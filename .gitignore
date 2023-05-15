@@ -1,3 +1,8 @@
 db.sqlite3
 __pycache__
 *.pyc
+lists/migrations/0003_item_list.py
+lists/migrations/0004_alter_item_list.py
+lists/migrations/0005_alter_item_list.py
+lists/migrations/0006_alter_item_list.py
+lists/migrations/0007_alter_item_list.py

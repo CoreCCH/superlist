@@ -85,4 +85,18 @@ class NewVisitorTest(LiveServerTestCase):
         self.assertIn('Buy milk', page_text)
 
         # 他們滿意地上床睡覺
+
+    def test_layout_and_styling(self):
+        #Edith 前往首頁
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+
+        #她發現輸入方塊已妥善被至中
+        inputbox.send_keys('testing\n')
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width']/2,
+            512,
+            delta = 5
+        )
         
