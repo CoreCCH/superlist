@@ -92,6 +92,14 @@ class NewVisitorTest(LiveServerTestCase):
         self.browser.set_window_size(1024, 768)
 
         #她發現輸入方塊已妥善被至中
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        
+        self.assertAlmostEqual(
+            inputbox.location['x'] + inputbox.size['width']/2,
+            512,
+            delta = 5
+        )
+
         inputbox.send_keys('testing\n')
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         self.assertAlmostEqual(
@@ -99,4 +107,3 @@ class NewVisitorTest(LiveServerTestCase):
             512,
             delta = 5
         )
-        
